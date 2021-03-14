@@ -1,0 +1,87 @@
+(
+    (import python:lpygame)
+    (import rand)
+    (import list)
+
+    (def yandere_sprites (list "YandereBloodCut" "YandereCut" "YandereDarkBloodCut" "YandereDarkCut" "YandereDarkNoEyeBloodCut" "YandereDarkNoEyeCut" "YandereKawaiBloodCut" "YandereKawaiCut"))
+
+    (def gen_yandere (
+        func () (
+            (def yandere_sprite (lpg:comp:sprite:create (+ "images/" (+ (rand:choice yandere_sprites) ".png"))))
+            (lpg:comp:sprite:setsize yandere_sprite (lpg:vec2:create 87 111))
+
+            (def yandere_collision (lpg:comp:collision:create))
+            (lpg:comp:collision:setsolid yandere_collision false)
+            (lpg:comp:collision:setcallback yandere_collision (
+                func (entity other cause) (
+                    (if (= other senpai) (
+                        (lpg:es:remove (lpg:world:getsystem (lpg:win:world win) "entity") other)
+                        (def yandere_run false)
+                    ) ())
+                )
+            ))
+
+            (def yandere_click (lpg:comp:click:create true))
+            (lpg:comp:click:callback yandere_click (
+                func (entity pos) (
+                    (if (= yandere_run true) (
+                        (lpg:es:remove (lpg:world:getsystem (lpg:win:world win) "entity") entity)
+                        (list:remove yanderes entity)
+                        (lpg:comp:text:settext text_text (str (+ (int (lpg:comp:text:text text_text)) 1)))
+                        (gen_yandere)
+                    )())
+                )
+            ))
+
+            (def yandere_move (lpg:comp:move:create (lpg:vec2:create 316.5 235.5)))
+            (lpg:comp:move:setspeed yandere_move 2)
+
+            (def random (rand:randint 0 3))
+            (if (= random 0) (def position (lpg:vec2:create (rand:randint -100 -10) (rand:randint -10 720))) ())
+            (if (= random 1) (def position (lpg:vec2:create (rand:randint -10 783) (rand:randint -100 -10))) ())
+            (if (= random 2) (def position (lpg:vec2:create (rand:randint 720 783) (rand:randint -10 720))) ())
+            (if (= random 3) (def position (lpg:vec2:create (rand:randint -10 783) (rand:randint 600 720))) ())
+
+            (def yandere (lpg:entity:create))
+            (lpg:entity:add yandere (lpg:comp:position:create position))
+            (lpg:entity:add yandere yandere_sprite)
+            (lpg:entity:add yandere yandere_collision)
+            (lpg:entity:add yandere yandere_click)
+            (lpg:entity:add yandere (lpg:comp:show:create true))
+            (lpg:entity:add yandere yandere_move)
+            (lpg:es:add (lpg:world:getsystem (lpg:win:world win) "entity") yandere)
+            (list:append yanderes yandere)
+        )
+    ))
+
+    (def win (lpg:win:create "YandereHelp" (lpg:vec2:create 720 600)))
+    (def yandere_run true)
+
+    (def senpai_sprite (lpg:comp:sprite:create "images/Senpai.png"))
+    (lpg:comp:sprite:setsize senpai_sprite (lpg:vec2:create 63 120))
+    (def senpai_collision (lpg:comp:collision:create))
+    (lpg:comp:collision:setsolid senpai_collision false)
+
+    (def senpai (lpg:entity:create))
+    (lpg:entity:add senpai (lpg:comp:position:create (lpg:vec2:create 328.5 240)))
+    (lpg:entity:add senpai senpai_sprite)
+    (lpg:entity:add senpai senpai_collision)
+    (lpg:entity:add senpai (lpg:comp:show:create true))
+    (lpg:es:add (lpg:world:getsystem (lpg:win:world win) "entity") senpai)
+
+    (def text_text (lpg:comp:text:create "0"))
+    (lpg:font:setsize (lpg:comp:text:font text_text) 20)
+    (lpg:font:setcolor (lpg:comp:text:font text_text) (lpg:color:fromname "WHITE"))
+
+    (def text (lpg:entity:create))
+    (lpg:entity:add text (lpg:comp:position:create (lpg:vec2:create 10 10)))
+    (lpg:entity:add text text_text)
+    (lpg:entity:add text (lpg:comp:show:create false))
+    (lpg:es:add (lpg:world:getsystem (lpg:win:world win) "entity") text)
+
+    (def yanderes (list))
+
+    (for i (list:range 0 5 1) ((gen_yandere)))
+
+    (lpg:win:run win)
+)
